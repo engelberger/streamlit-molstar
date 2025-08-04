@@ -33,6 +33,8 @@ class MolstarComponent extends StreamlitComponentBase<State> {
     const height = this.props.args["height"]
     const modelFile = this.props.args["modelFile"]
     const trajFile = this.props.args["trajFile"]
+    const mvsData = this.props.args["mvsData"]
+    const mvsUrl = this.props.args["mvsUrl"]
 
     if (modelFile && modelFile.data) {
       modelFile.data = this.props.args["modelFile_data"]
@@ -46,6 +48,8 @@ class MolstarComponent extends StreamlitComponentBase<State> {
           <Molstar
             modelFile={modelFile}
             trajFile={trajFile}
+            mvsData={mvsData}
+            mvsUrl={mvsUrl}
             showExpand={false}
             showAnimation={true}
           />
