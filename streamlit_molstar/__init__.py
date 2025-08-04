@@ -131,6 +131,27 @@ def st_molstar_remote(url, traj_url=None, height="240px", key=None):
     _component_func(key=key, default=None, **params)
 
 
+def st_molstar_mvs(mvs, height="240px", key=None):
+    """Render a Mol* scene from a MolViewSpec description.
+
+    Parameters
+    ----------
+    mvs : dict or str
+        The MolViewSpec JSON object or a URL pointing to a ``.mvsj`` file.
+    height : str, optional
+        Height of the component.
+    key : str, optional
+        Optional component key.
+    """
+
+    params = {"height": height}
+    if isinstance(mvs, str):
+        params["mvsUrl"] = mvs
+    else:
+        params["mvsData"] = mvs
+    _component_func(key=key, default=None, **params)
+
+
 # Add some test code to play with the component while it's in development.
 # During development, we can run this just as we would any other Streamlit
 # app: `$ streamlit run molstar_component/__init__.py`

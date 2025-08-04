@@ -1,11 +1,11 @@
 import React from "react"
 import ReactDOM from "react-dom"
 // @ts-ignore
-import MolstarComponent from "./MolstarComponent"
+import MolStarComponent from "./MolStarComponent"
 
 ReactDOM.render(
   <React.StrictMode>
-    <MolstarComponent />
+    <MolStarComponent />
   </React.StrictMode>,
   document.getElementById("root")
 )

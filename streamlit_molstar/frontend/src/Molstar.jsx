@@ -1,21 +1,21 @@
 import React, { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import { DefaultPluginUISpec } from "@dp-launching/molstar/lib/mol-plugin-ui/spec";
-import { QualityAssessmentPLDDTPreset, QualityAssessmentQmeanPreset } from '@dp-launching/molstar/lib/extensions/model-archive/quality-assessment/behavior';
-import { QualityAssessment } from '@dp-launching/molstar/lib/extensions/model-archive/quality-assessment/prop';
-import { TrajectoryFromModelAndCoordinates } from '@dp-launching/molstar/lib/mol-plugin-state/transforms/model';
-import { StateTransforms } from '@dp-launching/molstar/lib/mol-plugin-state/transforms';
-import { PluginConfig } from "@dp-launching/molstar/lib/mol-plugin/config";
-import "@dp-launching/molstar/build/viewer/molstar.css";
-import { ParamDefinition } from "@dp-launching/molstar/lib/mol-util/param-definition";
-import { CameraHelperParams } from "@dp-launching/molstar/lib/mol-canvas3d/helper/camera-helper";
-import { OpenFiles } from '@dp-launching/molstar/lib/mol-plugin-state/actions/file';
-import { Asset } from '@dp-launching/molstar/lib/mol-util/assets';
-import { PresetStructureRepresentations, StructureRepresentationPresetProvider } from '@dp-launching/molstar/lib/mol-plugin-state/builder/structure/representation-preset';
-import { StateObjectRef } from '@dp-launching/molstar/lib/mol-state';
-import { presetStaticComponent } from '@dp-launching/molstar/lib/mol-plugin-state/builder/structure/representation-preset';
+import { DefaultPluginUISpec } from "molstar/lib/mol-plugin-ui/spec";
+import { QualityAssessmentPLDDTPreset, QualityAssessmentQmeanPreset } from 'molstar/lib/extensions/model-archive/quality-assessment/behavior';
+import { QualityAssessment } from 'molstar/lib/extensions/model-archive/quality-assessment/prop';
+import { TrajectoryFromModelAndCoordinates } from 'molstar/lib/mol-plugin-state/transforms/model';
+import { StateTransforms } from 'molstar/lib/mol-plugin-state/transforms';
+import { PluginConfig } from "molstar/lib/mol-plugin/config";
+import "molstar/build/viewer/molstar.css";
+import { ParamDefinition } from "molstar/lib/mol-util/param-definition";
+import { CameraHelperParams } from "molstar/lib/mol-canvas3d/helper/camera-helper";
+import { OpenFiles } from 'molstar/lib/mol-plugin-state/actions/file';
+import { Asset } from 'molstar/lib/mol-util/assets';
+import { PresetStructureRepresentations, StructureRepresentationPresetProvider } from 'molstar/lib/mol-plugin-state/builder/structure/representation-preset';
+import { StateObjectRef } from 'molstar/lib/mol-state';
+import { presetStaticComponent } from 'molstar/lib/mol-plugin-state/builder/structure/representation-preset';
 
-import { Material } from '@dp-launching/molstar/lib/mol-util/material';
+import { Material } from 'molstar/lib/mol-util/material';
 
 import { createPluginUI } from './create-plugin-ui';
 const CustomMaterial = Material({ roughness: 0.2, metalness: 0 });
@@ -171,6 +171,7 @@ const Molstar = props => {
 
   const {
     modelFile, trajFile,
+    mvsData, mvsUrl,
     height = '100%', width = '100%',
     showAxes = true,
     defaultShowControls = false,
@@ -221,15 +222,23 @@ const Molstar = props => {
           }
         });
       }
-      await loadStructure(modelFile, trajFile, plugin.current);
+      if (mvsData || mvsUrl) {
+        await loadMvs(mvsData, mvsUrl, plugin.current);
+      } else {
+        await loadStructure(modelFile, trajFile, plugin.current);
+      }
     })();
     return () => plugin.current = null;
   }, [])
 
-
   useEffect(() => {
-    loadStructure(modelFile, trajFile, plugin.current);
-  }, [modelFile, trajFile])
+    if (!plugin.current) return;
+    if (mvsData || mvsUrl) {
+      loadMvs(mvsData, mvsUrl, plugin.current);
+    } else {
+      loadStructure(modelFile, trajFile, plugin.current);
+    }
+  }, [modelFile, trajFile, mvsData, mvsUrl])
 
 
   useEffect(() => {
@@ -308,6 +317,16 @@ const Molstar = props => {
       }
     }
   }
+
+  const loadMvs = async (mvsData, mvsUrl, plugin) => {
+    if (!plugin) return;
+    plugin.clear();
+    if (mvsUrl) {
+      await plugin.loadMvsData({ url: mvsUrl, format: 'mvsj' });
+    } else {
+      await plugin.loadMvsData({ data: mvsData, format: 'mvsj' });
+    }
+  }
   return (
     <div style={{ position: "absolute", width, height, overflow: "hidden" }}>
       <div ref={parentRef} style={{ position: "absolute", left: 0, top: 0, right: 0, bottom: 0 }} />
@@ -318,6 +337,8 @@ const Molstar = props => {
 Molstar.propTypes = {
   modelFile: PropTypes.object,
   trajFile: PropTypes.object,
+  mvsData: PropTypes.object,
+  mvsUrl: PropTypes.string,
 
   // Viz Control
   showAxes: PropTypes.bool,
